@@ -8,9 +8,12 @@ using System.Text.Json;
 
 namespace imap_samemu
 {
-    public class json
+    public class Json
     {
         public string Email { get; set; } = "";
         public string Password { get; set; } = "";
+
+
     }
+
 }
