@@ -2,34 +2,29 @@
     Install-Package MailKit
     Install-Package MimeKit
  */
-
 using imap_samemu;
 using MailKit.Net.Imap;
 using MailKit.Search;
 using MimeKit;
-
-
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
-class Program
+namespace imap_samemu
 {
-    private static readonly string Credentials = "C:/Users/wojtek/Desktop/imap/pass.json";
-
-    static async Task main()
+    class Program
     {
-        Console.WriteLine("=== Gmail Reader ===/n");
+        static async Task Main()
+        {
+            Console.WriteLine("=== Gmail Reader ===\n");
+            Console.WriteLine("Wczytywanie pliku JSON");
+            var dane = await Pomocnik.Wczytywanie();
 
-        Console.WriteLine("Wczytywanie pliku JSON");
+            if (dane == null)
+            {
+                Console.WriteLine("Nie udało się wczytać danych. Program zostanie zakończony.");
+            }
 
-       Wczytywanie();
-
-
-    }
-    static async Task<Json> Wczytywanie()
-    {
-
-
-        return null;
+            Console.WriteLine("Dane zostały wczytane");
+        }
     }
 }
-
