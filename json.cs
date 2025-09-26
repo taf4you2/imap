@@ -1,6 +1,4 @@
-﻿
-
-namespace imap_samemu
+﻿namespace imap_samemu
 {
     public class Json
     {

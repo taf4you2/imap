@@ -4,7 +4,7 @@ namespace imap_samemu
 {
     public static class Pomocnik
     {
-        private static readonly string SciezkaDoJson = "C:\\Users\\wojtek\\Desktop\\imap\\pass.json";
+        private static readonly string SciezkaDoJson = "pass.json";
 
         public static async Task<Json> Wczytywanie()
         {
@@ -27,9 +27,8 @@ namespace imap_samemu
 
                 Console.WriteLine($"Email: {rozpakowane.Email}");
                 Console.Write("Password: ");
-                for (int i = 0; i < rozpakowane.Password.Length; i++) Console.Write("*");
-                Console.WriteLine();
-                
+                Console.WriteLine(new string('*', rozpakowane.Password.Length));
+
                 /*
                 === TO DO ===
                 trzeba pytac na przyszlosc czy chce uzywac danych dla tego konta 
