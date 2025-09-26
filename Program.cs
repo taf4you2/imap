@@ -28,7 +28,7 @@ namespace imap_samemu
             }
 
             /*
-            === TO DO ===
+            === TO DO === nie przejmować się
             dorobic zapytanie jezeli danych sie nie uda wczytac czy chce wpisac jeszcze raz i czy chce je zapisac
             */
 
@@ -50,7 +50,39 @@ namespace imap_samemu
 
             await client.Inbox.OpenAsync(MailKit.FolderAccess.ReadOnly);
 
-            Console.WriteLine($"Połączono!");
+            Console.WriteLine($"Połączono!\n");
+
+            await WczytajIWyswietlMaile(client);
+
+            await client.DisconnectAsync(true);
         }
+
+        static async Task WczytajIWyswietlMaile(ImapClient client)
+        {
+            var inbox = client.Inbox;
+
+            Console.WriteLine($"Liczba wiadomości: {inbox.Count}");
+            Console.WriteLine("Pobieranie nagłówków wiadomości...\n");
+
+            // 10 ostatnich wiadomości
+            int liczbaMaili = Math.Min(10, inbox.Count);
+
+            for (int i = inbox.Count - liczbaMaili; i < inbox.Count; i++)
+            {
+                var wiadomosc = await inbox.GetMessageAsync(i);
+                WyswietlMailBezTresci(wiadomosc, i + 1);
+                Console.WriteLine(new string('-', 50));
+            }
+        }
+
+        static void WyswietlMailBezTresci(MimeMessage wiadomosc, int numer)
+        {
+            Console.WriteLine($"Mail #{numer}");
+            Console.WriteLine($"Od: {wiadomosc.From}");
+            Console.WriteLine($"Temat: {wiadomosc.Subject ?? "(brak tematu)"}");
+            Console.WriteLine($"Data: {wiadomosc.Date:yyyy-MM-dd HH:mm}");
+            Console.WriteLine("=============\n");
+        }
+
     }
 }

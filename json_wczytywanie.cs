@@ -30,7 +30,7 @@ namespace imap_samemu
                 Console.WriteLine(new string('*', rozpakowane.Password.Length));
 
                 /*
-                === TO DO ===
+                === TO DO === nie przejmować się
                 trzeba pytac na przyszlosc czy chce uzywac danych dla tego konta 
                 */
 
