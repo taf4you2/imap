@@ -51,8 +51,15 @@ namespace imap_samemu
             await client.Inbox.OpenAsync(MailKit.FolderAccess.ReadOnly);
 
             Console.WriteLine($"Połączono!\n");
+            Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
+            Console.ReadKey();
+            Console.Clear();
+
+            GornaCzesc(dane.Email);
 
             await WczytajIWyswietlMaile(client);
+
+            
 
             await client.DisconnectAsync(true);
         }
@@ -82,6 +89,13 @@ namespace imap_samemu
             Console.WriteLine($"Temat: {wiadomosc.Subject ?? "(brak tematu)"}");
             Console.WriteLine($"Data: {wiadomosc.Date:yyyy-MM-dd HH:mm}");
             Console.WriteLine("=============\n");
+        }
+
+        static void GornaCzesc(string email)
+        {
+            Console.WriteLine("=====================");
+            Console.WriteLine($"Jesteś zalogowany do:\n{email}");
+            Console.WriteLine("=====================\n");
         }
 
     }
