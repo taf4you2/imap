@@ -88,7 +88,6 @@ namespace imap_samemu
             Console.WriteLine($"Od: {wiadomosc.From}");
             Console.WriteLine($"Temat: {wiadomosc.Subject ?? "(brak tematu)"}");
             Console.WriteLine($"Data: {wiadomosc.Date:yyyy-MM-dd HH:mm}");
-            Console.WriteLine("=============\n");
         }
 
         static void GornaCzesc(string email)
