@@ -2,13 +2,13 @@
 
 namespace imap_samemu
 {
-    public static class Pomocnik
+    public static class Helper
     {
-        private static readonly string SciezkaDoJson = "pass.json";
+        private static readonly string PathToJson = "pass.json";
 
         public static async Task<Json> Wczytywanie()
         {
-            if (!File.Exists(SciezkaDoJson))
+            if (!File.Exists(PathToJson))
             {
                 Console.WriteLine("Plik JSON nie istnieje!");
                 return null;
@@ -16,18 +16,18 @@ namespace imap_samemu
 
             try
             {
-                string zawartosc = await File.ReadAllTextAsync(SciezkaDoJson);
-                var rozpakowane = JsonSerializer.Deserialize<Json>(zawartosc);
+                string contents = await File.ReadAllTextAsync(PathToJson);
+                var unpacked = JsonSerializer.Deserialize<Json>(contents);
 
-                if (string.IsNullOrWhiteSpace(rozpakowane?.Email) || string.IsNullOrWhiteSpace(rozpakowane?.Password))
+                if (string.IsNullOrWhiteSpace(unpacked?.Email) || string.IsNullOrWhiteSpace(unpacked?.Password))
                 {
                     Console.WriteLine("Brak wymaganych danych");
                     return null;
                 }
 
-                Console.WriteLine($"Email: {rozpakowane.Email}");
+                Console.WriteLine($"Email: {unpacked.Email}");
                 Console.Write("Password: ");
-                Console.WriteLine(new string('*', rozpakowane.Password.Length));
+                Console.WriteLine(new string('*', unpacked.Password.Length));
 
                 /*
                 === TO DO === nie przejmować się
@@ -35,7 +35,7 @@ namespace imap_samemu
                 */
 
 
-                return rozpakowane;
+                return unpacked;
             }
             catch (Exception ex)
             {
