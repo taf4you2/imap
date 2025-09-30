@@ -6,7 +6,7 @@ namespace imap_samemu
     {
         private static readonly string PathToJson = "pass.json";
 
-        public static async Task<Json> Wczytywanie()
+        public static async Task<Json> Loading()
         {
             if (!File.Exists(PathToJson))
             {

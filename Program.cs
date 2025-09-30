@@ -19,19 +19,19 @@ namespace imap_samemu
         {
             Console.WriteLine("=== Gmail Reader ===\n");
             Console.WriteLine("Wczytywanie pliku JSON");
-            var dane = await Helper.Wczytywanie();
+            var data = await Helper.Loading();
 
-            if (dane == null)
+            if (data == null)
             {
                 Console.WriteLine("Nie udało się wczytać danych. Program zostanie zakończony.");
                 return;
             }
 
             Console.WriteLine("Dane zostały wczytane pomyślnie");
-            await ReadGmailAsync(dane);
+            await ReadGmailAsync(data);
         }
 
-        static async Task ReadGmailAsync(Json dane)
+        static async Task ReadGmailAsync(Json data)
         {
             using var client = new ImapClient();
 
@@ -39,13 +39,13 @@ namespace imap_samemu
             await client.ConnectAsync("imap.gmail.com", 993, true);
 
             Console.WriteLine("Logowanie...");
-            await client.AuthenticateAsync(dane.Email, dane.Password);
+            await client.AuthenticateAsync(data.Email, data.Password);
 
             Console.WriteLine("Naciśnij dowolny klawisz, aby kontynuować...");
             Console.ReadKey();
             Console.Clear();
 
-            GornaCzesc(dane.Email);
+            UpperPart(data.Email);
 
             await client.Inbox.OpenAsync(MailKit.FolderAccess.ReadOnly);
 
@@ -105,7 +105,7 @@ namespace imap_samemu
             }
         }
 
-        static void WyswietlMailBezTresci(MimeMessage wiadomosc, int numer)
+        static void DisplayMailWithoutContent(MimeMessage wiadomosc, int numer)
         {
             Console.WriteLine($"Mail #{numer}");
             Console.WriteLine($"Od: {wiadomosc.From}");
@@ -113,7 +113,7 @@ namespace imap_samemu
             Console.WriteLine($"Data: {wiadomosc.Date:yyyy-MM-dd HH:mm}");
         }
 
-        static void GornaCzesc(string email)
+        static void UpperPart(string email)
         {
             Console.WriteLine("=====================");
             Console.WriteLine($"Jesteś zalogowany do:\n{email}");
