@@ -21,7 +21,7 @@ namespace imap_samemu
             {
                 if (File.Exists(_CounterFilePath))
                 {
-                    string content = File.ReadAllText(_CounterFilePath).Trim();
+                    string       content = File.ReadAllText(_CounterFilePath).Trim();
 
                     if (int.TryParse(content, out int count))
                     {
