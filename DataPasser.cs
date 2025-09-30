@@ -93,9 +93,6 @@ namespace imap_samemu
         {
             Console.WriteLine($"  Typ danych: {EmailPatternRecognizer.GetDataTypeString(data.DataType)}");
             Console.WriteLine($"  Timestamp: {data.Timestamp:yyyy-MM-dd HH:mm}");
-            Console.WriteLine($"  Liczba wartości numerycznych: {data.NumericValues.Count}");
-            Console.WriteLine($"  Liczba znaczników czasu: {data.TimeValues.Count}");
-            Console.WriteLine($"  Dopasowanych par: {data.ValueCount}");
 
             if (data.NumericValues.Count > 0)
             {

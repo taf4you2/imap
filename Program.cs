@@ -86,21 +86,25 @@ namespace imap_samemu
 
                     if (pattern.IsValid)
                     {
-                        Console.WriteLine($"Rozpoznano: {EmailPatternRecognizer.GetDataTypeString(pattern.DataType)} z {pattern.DateTime:yyyy-MM-dd HH:mm}");
+                        Console.WriteLine($"\n Rozpoznano: {EmailPatternRecognizer.GetDataTypeString(pattern.DataType)} z {pattern.DateTime:yyyy-MM-dd HH:mm}");
 
                         string messageBody = message.TextBody ?? message.HtmlBody ?? "";
 
-                        Console.WriteLine($"Treść do przetworzenia: {messageBody.Length} znaków");
-                    }
-                    else if (pattern.DataType != DataType.unknown)
-                    {
-                        Console.WriteLine($"Rozpoznano typ {EmailPatternRecognizer.GetDataTypeString(pattern.DataType)}, ale błędna data w: '{subject}'");
-                    }
+                        var parsedData = DataParser.ParsedEmailBody(messageBody, pattern.DataType, pattern.DateTime);
 
+                        if (parsedData.IsValid)
+                        {
+                            DataParser.PrintSummary(parsedData);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Nie udało się sparsować danych z treści emaila");
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($" Błąd przy przetwarzaniu wiadomości #{i + 1}: {ex.Message}");
+                    Console.WriteLine($"Błąd przy przetwarzaniu wiadomości nr - {i}: {ex.Message}");
                 }
             }
         }
