@@ -51,6 +51,14 @@ namespace imap_samemu
         {
             try
             {
+
+                /*
+                ========================================
+                pamietac o tym
+                ========================================
+                */
+
+                CurrentCount = 28; 
                 File.WriteAllText(_CounterFilePath, CurrentCount.ToString());
                 Console.WriteLine($"Zapisano nową liczbę wiadomości: {CurrentCount}");
             }

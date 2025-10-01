@@ -5,12 +5,12 @@ namespace imap_samemu
 {
     public enum DataType
     {
-        hrv,
-        temperatura,
-        sen,
-        oddech,
+        //hrv,
+        //temperatura,
+        //sen,
+        //oddech,
         tetno,
-        unknown
+        //unknown
     }
 
     public class EmailPattern
@@ -35,7 +35,7 @@ namespace imap_samemu
             var result = new EmailPattern
             {
                 OrginalSubject = subject,
-                DataType = DataType.unknown,
+                //DataType = DataType.unknown,
                 IsValid = false
             };
 
@@ -46,7 +46,7 @@ namespace imap_samemu
 
             foreach (DataType dataType in Enum.GetValues<DataType>())
             {
-                if (dataType == DataType.unknown) continue;
+                //if (dataType == DataType.unknown) continue;
 
                 string enumName = dataType.ToString().ToLower();
 
@@ -99,19 +99,19 @@ namespace imap_samemu
         public static bool IsRecognizedDataType(string subject)
         {
             var pattern = RecognizePattern(subject);
-            return pattern.IsValid && pattern.DataType != DataType.unknown;
+            return pattern.IsValid; //&& pattern.DataType != DataType.unknown;
         }
 
         public static string GetDataTypeString(DataType dataType)
         {
             return dataType switch
             {
-                DataType.hrv => "hrv",
-                DataType.temperatura => "temperatura",
-                DataType.sen => "sen",
-                DataType.oddech => "oddech",
+                //DataType.hrv => "hrv",
+                //DataType.temperatura => "temperatura",
+                //DataType.sen => "sen",
+                //DataType.oddech => "oddech",
                 DataType.tetno => "tetno",
-                _ => "unknown"
+                //_ => "unknown"
             };
         }
     }

@@ -90,13 +90,9 @@ namespace imap_samemu
 
                         string messageBody = message.TextBody ?? message.HtmlBody ?? "";
 
-                        var parsedData = DataParser.ParsedEmailBody(messageBody, pattern.DataType, pattern.DateTime);
+                        var parsedData = DataParser.ParseEmailBody(messageBody, pattern.DataType, pattern.DateTime);
 
-                        if (parsedData.IsValid)
-                        {
-                            DataParser.PrintSummary(parsedData);
-                        }
-                        else
+                        if (!parsedData.IsValid)
                         {
                             Console.WriteLine("Nie udało się sparsować danych z treści emaila");
                         }
