@@ -53,41 +53,41 @@ namespace imap_samemu
 
             var messageCounter = new MessageCounter();
 
-            int currentTotalMessages = client.Inbox.Count;
-            Console.WriteLine($"Całkowita liczba wiadomości w skrzynce: {currentTotalMessages}");
+            int totalMessages = client.Inbox.Count;
+            Console.WriteLine($"Całkowita liczba wiadomości w skrzynce: {totalMessages}");
 
-            if (messageCounter.HasNewMessages(currentTotalMessages))
-            {
-                int newMessagesCount = messageCounter.GetNewMessagesCount(currentTotalMessages);
-                Console.WriteLine($"Nowych wiadomości do przetworzenia: {newMessagesCount}");
-
-                await ProcessNewMessages(client, messageCounter.CurrentCount, currentTotalMessages);
-
-                messageCounter.UpdateProcessedCount(currentTotalMessages);
-            }
-            else
-            {
-                Console.WriteLine("Brak nowych wiadomości do przetworzenia.");
-            }
+            await ProcessMessages(client, messageCounter, totalMessages);
 
             Console.WriteLine("Zakończono przetwarzanie.");
         }
-
-        static async Task ProcessNewMessages(ImapClient client, int lastProcessed, int currentTotal)
+        static async Task ProcessMessages(ImapClient client, MessageCounter counter, int totalMessages)
         {
-            Console.WriteLine($"\nPrzetwarzanie wiadomości od {lastProcessed + 1} do {currentTotal}...");
+            Console.WriteLine($"\nSprawdzanie wiadomości...");
 
-            for (int i = lastProcessed; i < currentTotal; i++)
+            int newMessagesProcessed = 0;
+            string lastProcessedId = null;
+            bool foundLastProcessed = false;
+
+            // Przeglądaj od najnowszej do najstarszej
+            for (int i = totalMessages - 1; i >= 0; i--)
             {
                 try
                 {
                     var message = await client.Inbox.GetMessageAsync(i);
+                    string messageId = message.MessageId ?? $"unknown_{i}";
+
+                    // Jeśli znaleźliśmy ostatnio przetworzoną wiadomość, kończymy
+                    if (!counter.ShouldProcess(messageId))
+                    {
+                        foundLastProcessed = true;
+                        Console.WriteLine($"Znaleziono ostatnio przetworzoną wiadomość. Zatrzymano.");
+                        break;
+                    }
 
                     DisplayMailWithoutContent(message, i + 1);
                     Console.WriteLine();
 
                     string subject = message.Subject ?? "";
-
                     var pattern = EmailPatternRecognizer.RecognizePattern(subject);
 
                     if (pattern.IsValid)
@@ -95,7 +95,6 @@ namespace imap_samemu
                         Console.WriteLine($"\n Rozpoznano: {EmailPatternRecognizer.GetDataTypeString(pattern.DataType)} z {pattern.DateTime:yyyy-MM-dd HH:mm}");
 
                         string messageBody = message.TextBody ?? message.HtmlBody ?? "";
-
                         var parsedData = DataParser.ParseEmailBody(messageBody, pattern.DataType, pattern.DateTime);
 
                         bool saved = DataStorage.SaveData(parsedData);
@@ -105,14 +104,29 @@ namespace imap_samemu
                             Console.WriteLine("Nie udało się sparsować danych z treści emaila");
                         }
                     }
+
+                    // Zapamiętaj ID pierwszej przetworzonej wiadomości (najnowszej)
+                    if (lastProcessedId == null)
+                    {
+                        lastProcessedId = messageId;
+                    }
+
+                    newMessagesProcessed++;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine($"Błąd przy przetwarzaniu wiadomości nr - {i}: {ex.Message}");
+                    Console.WriteLine($"Błąd przy przetwarzaniu wiadomości nr {i}: {ex.Message}");
                 }
             }
-        }
 
+            // Zapisz ID najnowszej przetworzonej wiadomości
+            if (lastProcessedId != null)
+            {
+                counter.UpdateLastProcessed(lastProcessedId);
+            }
+
+            Console.WriteLine($"\nPrzetworzono {newMessagesProcessed} nowych wiadomości");
+        }
         static void DisplayMailWithoutContent(MimeMessage wiadomosc, int numer)
         {
             Console.WriteLine($"Mail #{numer}");

@@ -266,7 +266,7 @@ namespace imap_samemu
             {
                 Console.WriteLine($"Ostrzeżenie: Nie można posortować pliku {filePath}: {ex.Message}");
             }
-        }
+        }   
 
 
     }

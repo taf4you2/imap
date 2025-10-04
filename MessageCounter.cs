@@ -1,66 +1,44 @@
-﻿
-namespace imap_samemu
+﻿namespace imap_samemu
 {
     internal class MessageCounter
     {
         private readonly string _CounterFilePath;
+        private string _lastProcessedMessageId;
 
-        private int LastCount;
-
-        public MessageCounter (string CounterFilePath = "messege_counter.txt")
+        public MessageCounter(string CounterFilePath = "message_counter.txt")
         {
             _CounterFilePath = CounterFilePath;
-            LoadCount();
+            LoadLastProcessedId();
         }
 
-        public int CurrentCount => LastCount;
-
-        private void LoadCount()
+        private void LoadLastProcessedId()
         {
             try
             {
                 if (File.Exists(_CounterFilePath))
                 {
-                    string       content = File.ReadAllText(_CounterFilePath).Trim();
-
-                    if (int.TryParse(content, out int count))
-                    {
-                        LastCount = count;
-                        Console.WriteLine($"Wczytano ostatnią liczbę wiadomości: {LastCount}");
-                    }
-                    else
-                    {
-                        LastCount = 0;
-                        Console.WriteLine("Niepoprawny format w pliku licznika. Ustawiono na 0.");
-                    }
+                    _lastProcessedMessageId = File.ReadAllText(_CounterFilePath).Trim();
+                    Console.WriteLine($"Wczytano ostatnio przetworzone ID: {_lastProcessedMessageId}");
                 }
                 else
                 {
-                    LastCount = 0;
-                    Console.WriteLine("Plik licznika nie istnieje. Ustawiono na 0.");
+                    _lastProcessedMessageId = null;
+                    Console.WriteLine("Plik licznika nie istnieje. Pierwszy start.");
                 }
             }
             catch (Exception ex)
             {
-                LastCount = 0;
-                Console.WriteLine($"Błąd podczas wczytywania licznika: {ex.Message}. Ustawiono na 0.");
+                _lastProcessedMessageId = null;
+                Console.WriteLine($"Błąd podczas wczytywania licznika: {ex.Message}");
             }
         }
 
-        public void SaveCount(int CurrentCount)
+        private void SaveLastProcessedId(string messageId)
         {
             try
             {
-
-                /*
-                ========================================
-                pamietac o tym
-                ========================================
-                */
-
-                CurrentCount = 0;
-                File.WriteAllText(_CounterFilePath, CurrentCount.ToString());
-                Console.WriteLine($"Zapisano nową liczbę wiadomości: {CurrentCount}");
+                File.WriteAllText(_CounterFilePath, messageId);
+                Console.WriteLine($"Zapisano ostatnie ID: {messageId}");
             }
             catch (Exception ex)
             {
@@ -68,29 +46,26 @@ namespace imap_samemu
             }
         }
 
-        public int GetNewMessagesCount(int currentTotalCount)
+        public bool ShouldProcess(string messageId)
         {
-            int newMessages = currentTotalCount - LastCount;
-            return Math.Max(0, newMessages); // Nie może być ujemna
+            if (string.IsNullOrEmpty(_lastProcessedMessageId))
+            {
+                return true; // Pierwsza uruchomienie - przetwórz wszystko
+            }
+            return messageId != _lastProcessedMessageId;
         }
 
-        public void UpdateProcessedCount(int currentTotalCount)
+        public void UpdateLastProcessed(string messageId)
         {
-            LastCount = currentTotalCount;
-            SaveCount(currentTotalCount);
-        }
-
-        public bool HasNewMessages(int currentTotalCount)
-        {
-            return GetNewMessagesCount(currentTotalCount) > 0;
+            _lastProcessedMessageId = messageId;
+            SaveLastProcessedId(messageId);
         }
 
         public void Reset()
         {
-            LastCount = 0;
-            SaveCount(0);
+            _lastProcessedMessageId = null;
+            File.WriteAllText(_CounterFilePath, "");
             Console.WriteLine("Licznik został zresetowany.");
         }
-
     }
 }
