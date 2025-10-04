@@ -82,6 +82,10 @@ namespace imap_samemu
                 try
                 {
                     var message = await client.Inbox.GetMessageAsync(i);
+
+                    DisplayMailWithoutContent(message, i + 1);
+                    Console.WriteLine();
+
                     string subject = message.Subject ?? "";
 
                     var pattern = EmailPatternRecognizer.RecognizePattern(subject);

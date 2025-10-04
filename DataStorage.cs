@@ -103,7 +103,18 @@ namespace imap_samemu
                     {
                         bool fileExists = File.Exists(fullPath);
 
-                        File.AppendAllLines(fullPath, uniqueLines);
+                        // Dodaj nowe linie
+                        if (fileExists)
+                        {
+                            File.AppendAllLines(fullPath, uniqueLines);
+                        }
+                        else
+                        {
+                            File.WriteAllLines(fullPath, uniqueLines);
+                        }
+
+                        // Posortuj cały plik od najmłodszych do najstarszych
+                        SortFileByTimestamp(fullPath);
 
                         Console.WriteLine($"{(fileExists ? "Dodano" : "Utworzono")} {uniqueLines.Count} wpisów do {fileName} (data: {dateKey})");
                         totalSaved += uniqueLines.Count;
@@ -165,25 +176,34 @@ namespace imap_samemu
                     return newLines;
                 }
 
-                string lastExistingLine = existingLines[existingLines.Length - 1].Trim();
+                // Zbierz wszystkie już zapisane timestampy
+                var existingTimestamps = new HashSet<DateTime>();
 
-                var lastTimestamp = ExtractTimestampFromLine(lastExistingLine);
-
-                if (lastTimestamp == null)
+                foreach (var line in existingLines)
                 {
-                    return newLines;
+                    var timestamp = ExtractTimestampFromLine(line);
+                    if (timestamp.HasValue)
+                    {
+                        existingTimestamps.Add(timestamp.Value);
+                    }
                 }
 
+                // Filtruj nowe linie - dodaj tylko te, których timestamp nie istnieje
                 var uniqueLines = new List<string>();
 
                 foreach (var line in newLines)
                 {
                     var currentTimestamp = ExtractTimestampFromLine(line);
 
-                    if (currentTimestamp.HasValue && currentTimestamp.Value > lastTimestamp.Value)
+                    if (currentTimestamp.HasValue && !existingTimestamps.Contains(currentTimestamp.Value))
                     {
                         uniqueLines.Add(line);
                     }
+                }
+
+                if (newLines.Count - uniqueLines.Count > 0)
+                {
+                    Console.WriteLine($"  Pominięto {newLines.Count - uniqueLines.Count} duplikatów");
                 }
 
                 return uniqueLines;
@@ -210,12 +230,43 @@ namespace imap_samemu
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ex.Message}");
+                Console.WriteLine($"{ex.Message}");
             }
 
             return null;
         }
+        private static void SortFileByTimestamp(string filePath)
+        {
+            try
+            {
+                if (!File.Exists(filePath))
+                    return;
 
+                var lines = File.ReadAllLines(filePath);
+
+                if (lines.Length == 0)
+                    return;
+
+                // Parsuj linie i sortuj według timestampu (od najnowszych do najstarszych)
+                var sortedLines = lines
+                    .Select(line => new
+                    {
+                        Line = line,
+                        Timestamp = ExtractTimestampFromLine(line)
+                    })
+                    .Where(x => x.Timestamp.HasValue)
+                    .OrderByDescending(x => x.Timestamp.Value)
+                    .Select(x => x.Line)
+                    .ToList();
+
+                // Zapisz posortowane linie z powrotem do pliku
+                File.WriteAllLines(filePath, sortedLines);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ostrzeżenie: Nie można posortować pliku {filePath}: {ex.Message}");
+            }
+        }
 
 
     }
