@@ -26,8 +26,10 @@ namespace imap_samemu
                 Console.WriteLine("Nie udało się wczytać danych. Program zostanie zakończony.");
                 return;
             }
+            DataStorage.InitializeStorage();
 
-            Console.WriteLine("Dane zostały wczytane pomyślnie");
+
+            //Console.WriteLine("Dane zostały wczytane pomyślnie");
             await ReadGmailAsync(data);
         }
 
@@ -91,6 +93,8 @@ namespace imap_samemu
                         string messageBody = message.TextBody ?? message.HtmlBody ?? "";
 
                         var parsedData = DataParser.ParseEmailBody(messageBody, pattern.DataType, pattern.DateTime);
+
+                        bool saved = DataStorage.SaveData(parsedData);
 
                         if (!parsedData.IsValid)
                         {

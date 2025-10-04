@@ -17,7 +17,7 @@ namespace imap_samemu
             return Path.Combine(BaseDirectory, typeName);
         }
 
-        public static void InicializeStorage()
+        public static void InitializeStorage()
         {
             if (!Directory.Exists(BaseDirectory))
             {
@@ -47,7 +47,43 @@ namespace imap_samemu
             return $"{typeName}_{dateString}.txt";
         }
 
+        public static bool SaveData(ParsedData data)
+        {
+            try
+            {
+                if(!data.IsValid)
+                {
+                    Console.WriteLine("======   Próba zapisu nieprawidłowych danych   ======");
+                    return false;
+                }
 
+                string directoryPath = GetDataTypePath(data.DataType);
+                string fileName = GenerateFileName(data.DataType, data.Timestamp);
+                string fullPath = Path.Combine(directoryPath, fileName);
+                var linesToSave = DataParser.ConvertToSaveFormat(data);
+
+                bool fileExists = File.Exists(fullPath);
+                if (fileExists)
+                {
+                    File.AppendAllLines(fullPath, linesToSave);
+                    Console.WriteLine($"Dodano {linesToSave.Count} wpisów do: {fullPath}");
+                }
+                else
+                {
+                    File.WriteAllLines(fullPath, linesToSave);
+                    Console.WriteLine($"Utworzono nowy plik: {fullPath}");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Błąd podczas zapisu danych: {ex.Message}");
+                return false;
+            }
+            return true;
+        }
+
+        
 
 
 

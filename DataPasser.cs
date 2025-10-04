@@ -60,7 +60,7 @@ namespace imap_samemu
 
             foreach (string line in lines)
             {
-                Console.WriteLine(line);
+                //Console.WriteLine(line);
                 string value = line.Trim();
                 if (string.IsNullOrEmpty(value)) continue;
 
