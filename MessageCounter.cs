@@ -3,42 +3,42 @@
     internal class MessageCounter
     {
         private readonly string _CounterFilePath;
-        private string _lastProcessedMessageId;
+        private HashSet<string> _checkpointIds;
 
         public MessageCounter(string CounterFilePath = "message_counter.txt")
         {
             _CounterFilePath = CounterFilePath;
-            LoadLastProcessedId();
+            LoadCheckpoints();
         }
 
-        private void LoadLastProcessedId()
+        private void LoadCheckpoints()
         {
             try
             {
                 if (File.Exists(_CounterFilePath))
                 {
-                    _lastProcessedMessageId = File.ReadAllText(_CounterFilePath).Trim();
-                    Console.WriteLine($"Wczytano ostatnio przetworzone ID: {_lastProcessedMessageId}");
+                    var lines = File.ReadAllLines(_CounterFilePath);
+                    _checkpointIds = new HashSet<string>(lines);
+                    Console.WriteLine($"Wczytano {_checkpointIds.Count} punktów kontrolnych");
                 }
                 else
                 {
-                    _lastProcessedMessageId = null;
+                    _checkpointIds = new HashSet<string>();
                     Console.WriteLine("Plik licznika nie istnieje. Pierwszy start.");
                 }
             }
             catch (Exception ex)
             {
-                _lastProcessedMessageId = null;
+                _checkpointIds = new HashSet<string>();
                 Console.WriteLine($"Błąd podczas wczytywania licznika: {ex.Message}");
             }
         }
 
-        private void SaveLastProcessedId(string messageId)
+        private void SaveCheckpoints()
         {
             try
             {
-                File.WriteAllText(_CounterFilePath, messageId);
-                Console.WriteLine($"Zapisano ostatnie ID: {messageId}");
+                File.WriteAllLines(_CounterFilePath, _checkpointIds);
             }
             catch (Exception ex)
             {
@@ -46,25 +46,25 @@
             }
         }
 
-        public bool ShouldProcess(string messageId)
+        public bool IsCheckpoint(string messageId)
         {
-            if (string.IsNullOrEmpty(_lastProcessedMessageId))
-            {
-                return true; // Pierwsza uruchomienie - przetwórz wszystko
-            }
-            return messageId != _lastProcessedMessageId;
+            return _checkpointIds.Contains(messageId);
         }
 
-        public void UpdateLastProcessed(string messageId)
+        public void AddCheckpoint(string newestMessageId)
         {
-            _lastProcessedMessageId = messageId;
-            SaveLastProcessedId(messageId);
+            if (!string.IsNullOrEmpty(newestMessageId))
+            {
+                _checkpointIds.Add(newestMessageId);
+                SaveCheckpoints();
+                Console.WriteLine($"Dodano nowy punkt kontrolny: {newestMessageId}");
+            }
         }
 
         public void Reset()
         {
-            _lastProcessedMessageId = null;
-            File.WriteAllText(_CounterFilePath, "");
+            _checkpointIds.Clear();
+            SaveCheckpoints();
             Console.WriteLine("Licznik został zresetowany.");
         }
     }

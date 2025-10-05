@@ -65,8 +65,7 @@ namespace imap_samemu
             Console.WriteLine($"\nSprawdzanie wiadomości...");
 
             int newMessagesProcessed = 0;
-            string lastProcessedId = null;
-            bool foundLastProcessed = false;
+            string newestMessageId = null;
 
             // Przeglądaj od najnowszej do najstarszej
             for (int i = totalMessages - 1; i >= 0; i--)
@@ -76,11 +75,16 @@ namespace imap_samemu
                     var message = await client.Inbox.GetMessageAsync(i);
                     string messageId = message.MessageId ?? $"unknown_{i}";
 
-                    // Jeśli znaleźliśmy ostatnio przetworzoną wiadomość, kończymy
-                    if (!counter.ShouldProcess(messageId))
+                    // Zapisz ID pierwszej (najnowszej) wiadomości
+                    if (newestMessageId == null)
                     {
-                        foundLastProcessed = true;
-                        Console.WriteLine($"Znaleziono ostatnio przetworzoną wiadomość. Zatrzymano.");
+                        newestMessageId = messageId;
+                    }
+
+                    // Jeśli napotkano punkt kontrolny, zatrzymaj się
+                    if (counter.IsCheckpoint(messageId))
+                    {
+                        Console.WriteLine($"Napotkano punkt kontrolny: {messageId}. Zatrzymano.");
                         break;
                     }
 
@@ -105,12 +109,6 @@ namespace imap_samemu
                         }
                     }
 
-                    // Zapamiętaj ID pierwszej przetworzonej wiadomości (najnowszej)
-                    if (lastProcessedId == null)
-                    {
-                        lastProcessedId = messageId;
-                    }
-
                     newMessagesProcessed++;
                 }
                 catch (Exception ex)
@@ -119,10 +117,10 @@ namespace imap_samemu
                 }
             }
 
-            // Zapisz ID najnowszej przetworzonej wiadomości
-            if (lastProcessedId != null)
+            // Zapisz najnowsze ID jako nowy punkt kontrolny
+            if (newestMessageId != null && newMessagesProcessed > 0)
             {
-                counter.UpdateLastProcessed(lastProcessedId);
+                counter.AddCheckpoint(newestMessageId);
             }
 
             Console.WriteLine($"\nPrzetworzono {newMessagesProcessed} nowych wiadomości");
